@@ -276,3 +276,8 @@ logging:
   print_freq: 500 # how often to print training stats
   saveckpt_freq: 15000 # how often to save checkpoints
   save_seperate_video: True # whether to save seperate videos for each scene
+
+# ------------- data ------------ #
+data:
+  stream: false # use StreamWrapper for sequential sampling (SLAM-style)
+  stream_loop: true # when stream=true, loop over the sequence in training-style runs
