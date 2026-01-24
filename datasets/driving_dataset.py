@@ -13,7 +13,6 @@ from models.gaussians.basics import *
 from datasets.base.scene_dataset import ModelType
 from datasets.base.scene_dataset import SceneDataset
 from datasets.base.split_wrapper import SplitWrapper
-from datasets.base.stream_wrapper import StreamWrapper
 from utils.visualization import get_layout
 from utils.geometry import transform_points
 from utils.camera import get_interp_novel_trajectories
@@ -118,18 +117,13 @@ class DrivingDataset(SceneDataset):
         )
 
     def build_split_wrapper(self):
-        use_stream = bool(self.data_cfg.get("stream", False))
-        stream_loop = bool(self.data_cfg.get("stream_loop", True))
-        wrapper_cls = StreamWrapper if use_stream else SplitWrapper
-        train_image_set = wrapper_cls(
+        train_image_set = SplitWrapper(
             datasource=self.pixel_source,
             # train_indices are img indices, so the length is num_cams * num_train_timesteps
             split_indices=self.train_indices,
             split="train",
         )
-        if use_stream and hasattr(train_image_set, "set_loop"):
-            train_image_set.set_loop(stream_loop)
-        full_image_set = wrapper_cls(
+        full_image_set = SplitWrapper(
             datasource=self.pixel_source,
             # cover all the images
             split_indices=np.arange(self.pixel_source.num_imgs).tolist(),
@@ -137,7 +131,7 @@ class DrivingDataset(SceneDataset):
         )
         test_image_set = None
         if len(self.test_indices) > 0:
-            test_image_set = wrapper_cls(
+            test_image_set = SplitWrapper(
                 datasource=self.pixel_source,
                 # test_indices are img indices, so the length is num_cams * num_test_timesteps
                 split_indices=self.test_indices,
